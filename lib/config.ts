@@ -7,32 +7,8 @@ export const config = {
   },
   gemini: {
     apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyB_pgwWQkZ4OJT3S8RdXFg-zT7hGFGUbVY'
+  },
+  openai: {
+    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || ''
   }
 } as const;
-
-export function validateGoogleCredentials() {
-  const { clientEmail, privateKey, projectId } = config.google;
-  
-  if (!clientEmail?.trim()) {
-    throw new Error('Google Cloud client email not found');
-  }
-  
-  if (!privateKey?.trim()) {
-    throw new Error('Google Cloud private key not found');
-  }
-
-  if (!projectId?.trim()) {
-    throw new Error('Google Cloud project ID not found');
-  }
-  
-  // Format the private key as expected by Google Cloud
-  const formattedPrivateKey = privateKey.includes('PRIVATE KEY')
-    ? privateKey
-    : `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----`;
-  
-  return {
-    clientEmail,
-    privateKey: formattedPrivateKey,
-    projectId
-  };
-}

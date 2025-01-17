@@ -20,6 +20,7 @@ import { createPodcastAudio } from "@/lib/script-generator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { config } from "@/lib/config";
+import ThumbnailUploader from './create-podcast/thumbnail-uploader';
 
 export default function CreatePodcast() {
   const { toast } = useToast();
@@ -240,7 +241,6 @@ export default function CreatePodcast() {
                 <Button
                   onClick={() => {
                     setUseMultiSpeaker(false);
-
                     handleDefaultVoiceSelection();
                   }}
                   variant="outline"
@@ -278,11 +278,6 @@ export default function CreatePodcast() {
                         </SelectTrigger>
                         {useAwsVoice ? (
                           <SelectContent>
-                            {/* {clonedVoiceId && clonedVoiceName && (
-                              <SelectItem value={clonedVoiceId}>
-                                {clonedVoiceName}( English Male)
-                              </SelectItem>
-                            )} */}
                             <SelectItem value="Joanna">
                               Joanna( English Female)
                             </SelectItem>
@@ -306,11 +301,6 @@ export default function CreatePodcast() {
                           </SelectContent>
                         ) : (
                           <SelectContent>
-                            {/* {clonedVoiceId && clonedVoiceName && (
-                              <SelectItem value={clonedVoiceId}>
-                                {clonedVoiceName}( English Male)
-                              </SelectItem>
-                            )} */}
                             <SelectItem value="en-US-Studio-Q">
                               en-US-Studio-Q( English Male)
                             </SelectItem>
@@ -364,27 +354,7 @@ export default function CreatePodcast() {
               beforeGenerate={() => validateOptions()}
             />
 
-            <div className="space-y-4">
-              <label className="block text-sm font-medium">
-                Podcast Thumbnail
-              </label>
-              <div className="flex gap-4">
-                <Button variant="outline" className="flex-1">
-                  AI prompt to generate thumbnail
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  Upload custom image
-                </Button>
-              </div>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  SVG, PNG, JPG or GIF (max. 1080x1080px)
-                </p>
-              </div>
-            </div>
+            <ThumbnailUploader title={title} />
           </Card>
         )}
 
