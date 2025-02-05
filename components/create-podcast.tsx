@@ -21,6 +21,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { config } from "@/lib/config";
 import ThumbnailUploader from './create-podcast/thumbnail-uploader';
+import { savePodcastData } from '@/lib/services/firebase/podcast';
+import { useAuth } from '@/lib/firebase/auth-provider';
 
 export default function CreatePodcast() {
   const { toast } = useToast();
@@ -33,6 +35,8 @@ export default function CreatePodcast() {
   const [error, setError] = useState<string | null>(null);
   const [useMultiSpeaker, setUseMultiSpeaker] = useState(false);
   const [useAwsVoice, setUseAwsVoice] = useState(false);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const [clonedVoiceId, setClonedVoiceId] = useState<string | null>(null);
   const [clonedVoiceName, setClonedVoiceName] = useState<string | null>(null);
@@ -83,22 +87,22 @@ export default function CreatePodcast() {
 
   const validateOptions = () => {
     if (!title) {
-      return new Error("Please enter a podcast title");
+      throw new Error("Please enter a podcast title");
     }
 
     if (useMultiSpeaker && selectedSpeakers.length === 0) {
-      return new Error("Please add at least one speaker");
+      throw new Error("Please add at least one speaker");
     }
 
     if (useMultiSpeaker) {
       for (let index = 0; index < selectedSpeakers.length; index++) {
         const speaker = selectedSpeakers[index];
         if (!speaker.name || speaker.name === "") {
-          return new Error(`Please enter a name for speaker ${index + 1}`);
+          throw new Error(`Please enter a name for speaker ${index + 1}`);
         }
 
         if (!speaker.voice || speaker.voice === "") {
-          return new Error(`Please select a voice for speaker ${index + 1}`);
+          throw new Error(`Please select a voice for speaker ${index + 1}`);
         }
       }
     }
@@ -109,7 +113,7 @@ export default function CreatePodcast() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please generate or write a script first",
+        description: "Please generate or write a script first"
       });
       return;
     }
@@ -132,6 +136,18 @@ export default function CreatePodcast() {
         clonedVoiceId || "en-US-Neural2-D"
       );
 
+      // Save podcast data to Firebase
+      if (user?.email) {
+        await savePodcastData({
+          title,
+          description,
+          script,
+          thumbnailUrl: thumbnailUrl || undefined,
+          audioUrl,
+          userEmail: user.email
+        });
+      }
+
       const link = document.createElement("a");
       link.href = audioUrl;
       link.download = `${title.replace(/\s+/g, "-").toLowerCase()}.mp3`;
@@ -141,8 +157,15 @@ export default function CreatePodcast() {
 
       toast({
         title: "Success",
-        description: "Podcast generated and downloaded successfully!",
+        description: "Podcast generated and downloaded successfully!"
       });
+
+      // Reset form after successful generation
+      setTitle("");
+      setDescription("");
+      setScript("");
+      setThumbnailUrl(null);
+      setStep(1);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to generate podcast";
@@ -150,7 +173,7 @@ export default function CreatePodcast() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: errorMessage,
+        description: errorMessage
       });
     } finally {
       setIsGenerating(false);
@@ -354,7 +377,10 @@ export default function CreatePodcast() {
               beforeGenerate={() => validateOptions()}
             />
 
-            <ThumbnailUploader title={title} />
+            <ThumbnailUploader 
+              title={title} 
+              onThumbnailGenerated={setThumbnailUrl}
+            />
           </Card>
         )}
 

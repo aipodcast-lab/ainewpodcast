@@ -8,9 +8,10 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface ThumbnailUploaderProps {
   title: string;
+  onThumbnailGenerated: (url: string | null) => void;
 }
 
-export default function ThumbnailUploader({ title }: ThumbnailUploaderProps) {
+export default function ThumbnailUploader({ title, onThumbnailGenerated }: ThumbnailUploaderProps) {
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
@@ -29,6 +30,7 @@ export default function ThumbnailUploader({ title }: ThumbnailUploaderProps) {
     try {
       const imageUrl = await generateThumbnail(title);
       setThumbnailUrl(imageUrl);
+      onThumbnailGenerated(imageUrl);
       toast({
         title: "Success",
         description: "Thumbnail generated successfully!"
@@ -39,6 +41,7 @@ export default function ThumbnailUploader({ title }: ThumbnailUploaderProps) {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to generate thumbnail"
       });
+      onThumbnailGenerated(null);
     } finally {
       setIsGenerating(false);
     }
@@ -49,6 +52,7 @@ export default function ThumbnailUploader({ title }: ThumbnailUploaderProps) {
     if (file) {
       const url = URL.createObjectURL(file);
       setThumbnailUrl(url);
+      onThumbnailGenerated(url);
     }
   };
 
