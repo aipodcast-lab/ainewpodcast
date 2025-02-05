@@ -7,6 +7,7 @@ interface PodcastData {
   description: string;
   script: string;
   thumbnailUrl?: string;
+  audioUrl?: string; 
   userEmail: string;
   createdAt: string;
 }
